@@ -569,6 +569,7 @@ def collect_submodules(
     package: str,
     filter: Callable[[str], bool] = lambda name: True,
     on_error: str = "warn once",
+    isolated_callable = None,
 ):
     """
     List all submodules of a given package.
@@ -588,6 +589,9 @@ def collect_submodules(
               subsequent errors are ignored to minimise *stderr pollution*. This
               is the default.
             - ignore: Skip all errors. Don't warn about anything.
+        isolated_callable:
+            Custom isolated import module
+            - default is built-in _collect_submodules
     Returns:
         All submodules to be assigned to ``hiddenimports`` in a hook.
 
@@ -604,6 +608,7 @@ def collect_submodules(
 
     """
     # Accept only strings as packages.
+    isolated_callable = isolated_callable or _collect_submodules
     if not isinstance(package, str):
         raise TypeError('package must be a str')
     if on_error not in ("ignore", "warn once", "warn", "raise"):
@@ -632,7 +637,7 @@ def collect_submodules(
         while todo:
             # Scan the given (sub)package
             name = todo.pop()
-            modules, subpackages, on_error = isolated_python.call(_collect_submodules, name, on_error)
+            modules, subpackages, on_error = isolated_python.call(isolated_callable, name, on_error)
 
             # Add modules to the list of all submodules
             package_submodules += [module for module in modules if filter(module)]

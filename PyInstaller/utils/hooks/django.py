@@ -9,6 +9,7 @@
 # SPDX-License-Identifier: (GPL-2.0-or-later WITH Bootloader-exception)
 # ----------------------------------------------------------------------------
 import os
+from typing import Callable
 
 from PyInstaller import isolated
 

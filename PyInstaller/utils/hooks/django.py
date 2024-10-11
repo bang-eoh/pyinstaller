@@ -152,6 +152,7 @@ def django_find_root_dir():
     return settings_dir
 
 
+@isolated.decorate
 def django_collect_submodules(
     package: str,
     filter: Callable[[str], bool] = lambda name: True,
@@ -168,8 +169,7 @@ def django_collect_submodules(
     )
 
 
-
-
+@isolated.decorate
 def _django_collect_submodules(name, on_error):
     from PyInstaller.utils import hooks as hookutils
     import django  # noqa: E402

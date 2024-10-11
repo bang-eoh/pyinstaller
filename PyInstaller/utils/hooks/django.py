@@ -14,6 +14,30 @@ from typing import Callable
 from PyInstaller import isolated
 
 
+def django_collect_submodules(
+    package: str,
+    filter: Callable[[str], bool] = lambda name: True,
+    on_error: str = "warn once",
+    isolated_callable = None,
+):
+    from PyInstaller.utils import hooks as hookutils
+
+    return hookutils.collect_submodules(
+        package=package, 
+        filter=filter, 
+        on_error=on_error,
+        isolated_callable=_django_collect_submodules,
+    )
+
+
+def _django_collect_submodules(name, on_error):
+    from PyInstaller.utils import hooks as hookutils
+    import django  # noqa: E402
+
+    django.setup()
+    hookutils._collect_submodules(name, on_error)
+
+
 @isolated.decorate
 def django_dottedstring_imports(django_root_dir):
     """
@@ -150,29 +174,3 @@ def django_find_root_dir():
                     break  # Find the first directory.
 
     return settings_dir
-
-
-@isolated.decorate
-def django_collect_submodules(
-    package: str,
-    filter: Callable[[str], bool] = lambda name: True,
-    on_error: str = "warn once",
-    isolated_callable = None,
-):
-    from PyInstaller.utils import hooks as hookutils
-
-    return hookutils.collect_submodules(
-        package=package, 
-        filter=filter, 
-        on_error=on_error,
-        isolated_callable=_django_collect_submodules,
-    )
-
-
-@isolated.decorate
-def _django_collect_submodules(name, on_error):
-    from PyInstaller.utils import hooks as hookutils
-    import django  # noqa: E402
-
-    django.setup()
-    hookutils._collect_submodules(name, on_error)

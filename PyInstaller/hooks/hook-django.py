@@ -32,7 +32,7 @@ if root_dir:
     # Include all submodules of all imports detected in mysite.settings.py.
     for submod in settings_py_imports:
         hiddenimports.append(submod)
-        hiddenimports += hooks.collect_submodules(submod)
+        hiddenimports += django.django_collect_submodules(submod)
     # Include main django modules - settings.py, urls.py, wsgi.py. Without them the django server won't run.
     package_name = os.path.basename(root_dir)
     default_settings_module = f'{package_name}.settings'

@@ -14,30 +14,6 @@ from typing import Callable
 from PyInstaller import isolated
 
 
-def django_collect_submodules(
-    package: str,
-    filter: Callable[[str], bool] = lambda name: True,
-    on_error: str = "warn once",
-    isolated_callable = None,
-):
-    from PyInstaller.utils import hooks as hookutils
-
-    return hookutils.collect_submodules(
-        package=package, 
-        filter=filter, 
-        on_error=on_error,
-        isolated_callable=_django_collect_submodules,
-    )
-
-
-def _django_collect_submodules(name, on_error):
-    from PyInstaller.utils import hooks as hookutils
-    import django  # noqa: E402
-
-    django.setup()
-    return hookutils._collect_submodules(name, on_error)
-
-
 @isolated.decorate
 def django_dottedstring_imports(django_root_dir):
     """
@@ -84,6 +60,25 @@ def django_dottedstring_imports(django_root_dir):
     if hasattr(settings, 'TEMPLATE_CONTEXT_PROCESSORS'):
         hiddenimports += list(settings.TEMPLATE_CONTEXT_PROCESSORS)
 
+    if hasattr(settings, 'TEMPLATES'):
+        for template in settings.TEMPLATES:
+            hiddenimports += list(template.get('OPTIONS', {}).get('context_processors', []))
+
+    if hasattr(settings, 'CACHES'):
+        for cache in settings.CACHES.values():
+            if cache.get('BACKEND'):
+                cl = _remove_class(cache.get('BACKEND'))
+                hiddenimports.append(cl)
+            client_class = cache.get('OPTIONS', {}).get('CLIENT_CLASS')
+            if client_class:
+                cl = _remove_class(cclient_class)
+                hiddenimports.append(cl)
+
+    if hasattr(settings, 'STORAGES'):
+        for storage in settings.STORAGES.values():
+            if storage.get('BACKEND'):
+                cl = _remove_class(storage.get('BACKEND'))
+
     if hasattr(settings, 'TEMPLATE_LOADERS'):
         hiddenimports += list(settings.TEMPLATE_LOADERS)
 
@@ -109,6 +104,10 @@ def django_dottedstring_imports(django_root_dir):
             hiddenimports.append(cl)
     if hasattr(settings, 'MIDDLEWARE_CLASSES'):
         for cl in settings.MIDDLEWARE_CLASSES:
+            cl = _remove_class(cl)
+            hiddenimports.append(cl)
+    if hasattr(settings, 'MIDDLEWARE'):
+        for cl in settings.MIDDLEWARE:
             cl = _remove_class(cl)
             hiddenimports.append(cl)
     # Templates is a dict:
@@ -175,3 +174,27 @@ def django_find_root_dir():
                     break  # Find the first directory.
 
     return settings_dir
+
+
+def django_collect_submodules(
+    package: str,
+    filter: Callable[[str], bool] = lambda name: True,
+    on_error: str = "warn once",
+    isolated_callable = None,
+):
+    from PyInstaller.utils import hooks as hookutils
+
+    return hookutils.collect_submodules(
+        package=package, 
+        filter=filter, 
+        on_error=on_error,
+        isolated_callable=_django_collect_submodules,
+    )
+
+
+def _django_collect_submodules(name, on_error):
+    from PyInstaller.utils import hooks as hookutils
+    import django  # noqa: E402
+
+    django.setup()
+    return hookutils._collect_submodules(name, on_error)

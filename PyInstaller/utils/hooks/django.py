@@ -75,7 +75,7 @@ def django_dottedstring_imports(django_root_dir):
                 hiddenimports.append(cl)
             client_class = cache.get('OPTIONS', {}).get('CLIENT_CLASS')
             if client_class:
-                cl = _remove_class(cclient_class)
+                cl = _remove_class(client_class)
                 hiddenimports.append(cl)
 
     if hasattr(settings, 'STORAGES'):

@@ -52,6 +52,7 @@ def django_dottedstring_imports(django_root_dir):
     import os
 
     import PyInstaller.utils.misc
+    from PyInstaller.utils import hooks as hookutils
 
     # Extra search paths to add to sys.path:
     #  - parent directory of the django_root_dir
@@ -131,7 +132,7 @@ def django_dottedstring_imports(django_root_dir):
         app_templatetag_module = app + '.templatetags'
         app_ctx_proc_module = app + '.context_processors'
         hiddenimports.append(app_templatetag_module)
-        hiddenimports += django_collect_submodules(app_templatetag_module)
+        hiddenimports += hookutils.collect_submodules(app_templatetag_module)
         hiddenimports.append(app_ctx_proc_module)
 
     # Deduplicate imports.

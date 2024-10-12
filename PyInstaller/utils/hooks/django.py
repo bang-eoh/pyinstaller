@@ -56,6 +56,10 @@ def django_dottedstring_imports(django_root_dir):
 
     hiddenimports = list(settings.INSTALLED_APPS)
 
+
+    def _remove_class(class_name):
+        return '.'.join(class_name.split('.')[0:-1])
+
     # Do not fail script when settings does not have such attributes.
     if hasattr(settings, 'TEMPLATE_CONTEXT_PROCESSORS'):
         hiddenimports += list(settings.TEMPLATE_CONTEXT_PROCESSORS)
@@ -83,9 +87,6 @@ def django_dottedstring_imports(django_root_dir):
         hiddenimports += list(settings.TEMPLATE_LOADERS)
 
     hiddenimports += [settings.ROOT_URLCONF]
-
-    def _remove_class(class_name):
-        return '.'.join(class_name.split('.')[0:-1])
 
     #-- Changes in Django 1.7.
 

@@ -657,7 +657,7 @@ def collect_submodules(
 def _collect_submodules(name, on_error):
     import sys
     import pkgutil
-    from traceback import format_exception_only
+    from traceback import format_exception
 
     from PyInstaller.utils.hooks import logger
 
@@ -673,7 +673,7 @@ def _collect_submodules(name, on_error):
         # Catch all errors and either raise, warn, or ignore them as determined by the *on_error* parameter.
         if on_error in ("warn", "warn once"):
             from PyInstaller.log import logger
-            ex = "".join(format_exception_only(type(ex), ex)).strip()
+            ex = "".join(format_exception(ex)).strip()
             logger.warning(f"Failed to collect submodules for '{name}' because importing '{name}' raised: {ex}")
             if on_error == "warn once":
                 on_error = "ignore"

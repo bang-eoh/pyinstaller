@@ -35,7 +35,7 @@ def _django_collect_submodules(name, on_error):
     import django  # noqa: E402
 
     django.setup()
-    hookutils._collect_submodules(name, on_error)
+    return hookutils._collect_submodules(name, on_error)
 
 
 @isolated.decorate
